@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  
+<mapper namespace="admin">
+   <!-- 공지사항 저장 -->
+   <insert id="insertArticle" parameterType="adminDTO">
+      insert into notice(noticeno,noticeId,noticesubject,noticecontent,noticePhoto,reg) 
+      values(notice_seq.nextval,#{noticeId},#{noticeSubject},#{noticeContent},
+      <if test="noticePhoto != null">#{noticePhoto},</if>
+      <if test="noticePhoto == null">null,</if> 
+      sysdate)
+   </insert>
+	<!-- 공지사항 개수 -->
+	<select id="countAll" resultType="int">
+		select count(*) from notice
+	</select>
+	<!-- 공지사항 리스트 -->
+	<select id="getArticles" parameterType="hashmap" resultType="adminDTO">
+	 <![CDATA[
+		select B.*, r from
+   		 	(select A.*,rownum r from
+       			(select * from notice order by noticeno desc)A
+    		order by noticeno desc)B
+		where r>=#{startRow} and r <=#{endRow}
+	]]>
+	</select>
+	
+	<!-- 공지사항 검색된 리스트 개수 -->
+	<select id="NoticeSearchcount" parameterType="hashmap" resultType="int">
+		select count(*) from notice where ${sel} like '%'||#{search}||'%'
+	</select>
+	
+	<!--검색된 한 페이지 리스트 -->
+	<select id="NoticeSearchlist" parameterType="hashmap" resultType="adminDTO">
+	 <![CDATA[
+		select B.*, r from
+   		 	(select A.*,rownum r from
+       			(select * from notice where ${sel} like '%'||#{search}||'%' order by noticeno desc)A
+    		order by noticeno desc)B
+		where r>=#{startRow} and r <=#{endRow}
+	]]>
+	</select>
+	<!-- 공지사항 글 가져오기 -->
+	<select id="getnotice" parameterType="int" resultType="adminDTO">
+		select * from notice where noticeNo = #{value}
+	</select>
+	
+	<!--공지사항 수정  -->
+	<update id="noticeModify" parameterType="adminDTO">
+		update notice set noticeSubject=#{noticeSubject}, noticeContent=#{noticeContent} where noticeNo = #{noticeNo}
+	</update>
+	<!-- 공지사항 사진 수정 -->
+	<update id="updateNoticePhoto" parameterType="AdminDTO">
+		update notice set noticePhoto=#{noticePhoto} where noticeNo=#{noticeNo}
+	</update>	
+	
+	<!-- 공지사항 삭제 -->
+	<delete id="noticeDelete" parameterType="int">
+		delete from notice where noticeNo=#{value}
+	</delete>
+	<!-- ******************유저 검색******************************** -->
+	
+	<!-- 유저 count -->
+	<select id="getadUserCount" resultType="int">
+		select count(*) from users
+	</select>
+	
+	<!-- 유저 list -->
+	<select id="adUserlist" parameterType="hashmap" resultType="userDTO">
+	 <![CDATA[
+		select B.*, r from
+   		 	(select A.*,rownum r from
+       			(select * from users order by reg desc)A
+    		order by reg desc)B
+		where r>=#{startRow} and r <=#{endRow}
+	]]>
+	</select>
+	
+	<!--검색된 유저 count -->
+	<select id="adUserSearchCount" parameterType="hashmap" resultType="int">
+		select count(*) from users where ${sel} like '%'||#{search}||'%'
+	</select>
+	
+	<!--검색된 유저 list -->
+	<select id="adUserSearchlist" parameterType="hashmap" resultType="userDTO">
+	 <![CDATA[
+		select B.*, r from
+   		 	(select A.*,rownum r from
+       			(select * from users where ${sel} like '%'||#{search}||'%' order by reg desc)A
+    		order by reg desc)B
+		where r>=#{startRow} and r <=#{endRow}
+	]]>
+	</select>
+	
+	<!-- 유저 상태변경 -->
+	<update id="useractivenum" parameterType="userDTO">
+		update users set useractivenum = #{useractivenum},userreason = #{userreason} where id=#{id}
+	</update>	
+	<!-- ******************1:1 문의********************************* -->
+
+	<!-- 1:1 문의 게시글 개수 -->
+	<select id="QuestionListcount" resultType="int">
+		select count(*) from mtm
+	</select>
+	
+	<!-- 1:1문의 리스트 -->
+	<select id="QuestionList" parameterType="hashmap" resultType="mtmDTO">
+	 <![CDATA[
+	select B.*, r from
+   		 	(select A.*,rownum r from
+       			(select * from mtm order by ref asc, reg desc)A
+    		order by ref asc, reg desc)B
+    where r>=#{start} and r <=#{end}
+	]]>
+	</select>
+	
+	<!-- 1:1답변 -->
+	<update id="adQuestionContentPro" parameterType="mtmDTO">
+		update mtm set ref=#{ref} where mtmno=#{mtmno}
+	</update>
+	
+	<!-- 1:1답변 삭제 -->
+	<update id="adQuestiondelete" parameterType="mtmDTO">
+		update mtm set ref='none' where mtmno=#{mtmno}
+	</update>
+	
+	<!-- 1:1문의 검색된 글 개수 -->
+	<select id="searchQuestioncount" parameterType="hashmap" resultType="int">
+		select count(*) from mtm where ${sel} like '%'||#{search}||'%'
+	</select>
+	
+	<!-- 1:1문의 검색 리스트 -->
+ 	<select id="searchQuestionList" parameterType="hashmap" resultType="mtmDTO">
+	<![CDATA[
+		select B.*,r from
+			(select A.*, rownum r from
+				(select * from mtm where ${sel} like '%'||#{search}||'%' order by mtmno desc) A
+			order by mtmno desc) B
+		where r>= #{start} and r <= #{end}	
+	]]>	
+	</select>
+	
+	<!-- ************************************** 병원 등록/수정/삭제 *************************-->
+	<!-- 병원 등록 -->
+	<insert id="adHosSignup" parameterType="hosDTO">
+		insert into hospital(hosNo,hosName,hosNewAddress,hosSi,hosGu,hosNum,x,y) values(hospital_seq.nextval,#{hosName},#{hosNewAddress},#{hosSi},#{hosGu},#{hosNum},#{x},#{y})
+	</insert>
+	<!-- hosNo 최대값 가져오기 -->
+	<select id="maxhosNo" resultType="int">
+		select max(hosno) from hospital
+	</select>
+	
+	
+	<!-- 병원 수정 -->
+	<update id="adHosModify" parameterType="hosDTO">
+		update hospital set hosName=#{hosName},hosNewAddress=#{hosNewAddress},hosSi=#{hosSi},hosGu=#{hosGu},hosNum=#{hosNum},x=#{x},y=#{y} where hosNo=#{hosNo}
+	</update>
+	<!-- 병원 삭제 -->
+	<delete id="adhosDeleteForm" parameterType="hosDTO">
+		delete from hospital where hosNo=#{hosNo}
+	</delete>
+	
+	<!-- ************************************ 진료비 등록/수정/삭제 *********************************** -->
+	<!-- 해당병원 진료비 테이블 불러오기 -->
+	<select id="getDog" parameterType="int" resultType="dogDTO">
+		select * from dog where hosNo=#{value}
+	</select>
+	<select id="getCat" parameterType="int" resultType="catDTO">
+		select * from cat where hosNo=#{value}
+	</select>
+	
+	<!-- 진료비 등록 dog -->
+	<insert id="adDogSignup" parameterType="int">
+		insert into dog(hosNo) values(${value})
+	</insert>
+	
+	<!-- 진료비 등록 cat -->
+	<insert id="adCatSignup" parameterType="int">
+		insert into cat(hosNo) values(${value})
+	</insert>
+	
+	<!-- 진료비 수정 dog -->
+	<update id="adDogModify" parameterType="dogDTO">
+		update dog set DALLTEST=#{dAllTest},DBLOODTEST=#{dBloodTest},DULTRASONICWAVE=#{dUltrasonicWave},DXRAY=#{dXray},DALLERGY=#{dAllergy},
+		DHEARTBUGKIT=#{dHeartbugKit},DBASICPHYSICALTEST=#{dBasicPhysicalTest},D1=#{d1},D2=#{d2},D3=#{d3},D4=#{d4},D5=#{d5},D6=#{d6},DCIPM=#{dCIPM},
+		DANTIBODYTEST=#{dAntibodyTest},DBOOSTERVCC=#{dBoosterVcc},DBLADDERSTONE=#{dBladderStone},DYODOSTONE=#{dYodoStone},DBREASTTUMOR=#{dBreastTumor},
+		DPYOMETRA=#{dPyometra},DETCTUMORS=#{dEtcTumors},DLEGTEST=#{dLegTest},DPATELLADISLOCATION=#{dPatellaDislocation},DFEMORALHEAD=#{dFemoralHead},DACL=#{dACL},
+		DTHROWUP=#{dThrowUp},DDIARRHEA=#{dDiarrhea},DBLOODPOOP=#{dBloodPoop},DBASICCARE=#{dBasicCare},DEYECARE=#{dEyeCare},DCHERRYEYE=#{dCherryEye},DTNRM=#{dTNRM},
+		DTNRW=#{dTNRW},DSCALING=#{dScaling},DALLTOOTH=#{dAllTooth},DMILKTOOTH=#{dMilkTooth},DDENTALCARE=#{dDentalCare},DFOREVERTOOTH=#{dForeverTooth},DHERNIA=#{dHernia},DSKINCARE=#{dSkinCare} 
+		where hosNo=#{hosNo}
+	</update>
+	
+	<!-- 진료비 수정 cat -->
+	<update id="adCatModify" parameterType="catDTO">
+		update cat set CALLTEST=#{cAllTest},CBLOODTEST=#{cBloodTest},CULTRASONOGRAPHY=#{cUltrasonography},CXRAY=#{cXray},CALLERGY=#{cAllergy},
+		CHEARTBUGKIT=#{cHeartbugKit},CBASICPHYSICALTEST=#{cBasicPhysicalTest},CPCR=#{cPCR},CBLADDERSTONE=#{cBladderStone},CYODOSTONE=#{cYodoStone},
+		C1=#{c1},C2=#{c2},C3=#{c3},CCIPM=#{cCIPM},CANTIBODYTEST=#{cAntibodyTest},CBOOSTERVCC=#{cBoosterVcc},CRABIES=#{cRabies},CBREASTTUMOR=#{cBreastTumor},
+		CPYOMETRA=#{cPyometra},CETCTUMORS=#{cEtcTumors},CLEGTEST=#{cLegTest},CPATELLADISLOCATION=#{cPatellaDislocation},CFEMORALHEAD=#{cFemoralHead},CACL=#{cACL},
+		CTHROWUP=#{cThrowUp},CDIARRHEA=#{cDiarrhea},CBLOODPOOP=#{cBloodPoop},CBASICCARE=#{cBasicCare},CEYECARE=#{cEyeCare},CCHERRYEYE=#{cCherryEye},CTNRM=#{cTNRM},
+		CTNRW=#{cTNRW},CSCALING=#{cScaling},CALLTOOTH=#{cAllTooth},CMILKTOOTH=#{cMilkTooth},CDENTALCARE=#{cDentalCare},CFOREVERTOOTH=#{cForeverTooth},CHERNIA=#{cHernia},CSKINCARE=#{cSkinCare} 
+		where hosNo=#{hosNo}
+	</update>
+	
+	<!-- 진료비 초기화 dog -->
+	<update id="adDogDelete" parameterType="int">
+		update dog set DALLTEST=0,DBLOODTEST=0,DULTRASONICWAVE=0,DXRAY=0,DALLERGY=0,DHEARTBUGKIT=0,DBASICPHYSICALTEST=0,D1=0,D2=0,D3=0,D4=0,D5=0,D6=0,DCIPM=0,
+		DANTIBODYTEST=0,DBOOSTERVCC=0,DBLADDERSTONE=0,DYODOSTONE=0,DBREASTTUMOR=0,DPYOMETRA=0,DETCTUMORS=0,DLEGTEST=0,DPATELLADISLOCATION=0,DFEMORALHEAD=0,DACL=0,
+		DTHROWUP=0,DDIARRHEA=0,DBLOODPOOP=0,DBASICCARE=0,DEYECARE=0,DCHERRYEYE=0,DTNRM=0,DTNRW=0,DSCALING=0,DALLTOOTH=0,DMILKTOOTH=0,DDENTALCARE=0,DFOREVERTOOTH=0,DHERNIA=0,DSKINCARE=0  
+		where hosNo=#{value}
+	</update>
+	
+	<!-- 진료비 초기화 cat -->
+	<update id="adCatDelete" parameterType="int">
+		update cat set CALLTEST=0,CBLOODTEST=0,CULTRASONOGRAPHY=0,CXRAY=0,CALLERGY=0,CHEARTBUGKIT=0,CBASICPHYSICALTEST=0,CPCR=0,CBLADDERSTONE=0,CYODOSTONE=0,
+		C1=0,C2=0,C3=0,CCIPM=0,CANTIBODYTEST=0,CBOOSTERVCC=0,CRABIES=0,CBREASTTUMOR=0,CPYOMETRA=0,CETCTUMORS=0,CLEGTEST=0,CPATELLADISLOCATION=0,CFEMORALHEAD=0,CACL=0,
+		CTHROWUP=0,CDIARRHEA=0,CBLOODPOOP=0,CBASICCARE=0,CEYECARE=0,CCHERRYEYE=0,CTNRM=0,CTNRW=0,CSCALING=0,CALLTOOTH=0,CMILKTOOTH=0,CDENTALCARE=0,CFOREVERTOOTH=0,CHERNIA=0,CSKINCARE=0  
+		where hosNo=#{hosNo}
+	</update>
+	
+	<!-- 진료비 삭제 dog -->
+	<delete id="DogDelete" parameterType="hosDTO">
+		delete from dog where hosNo = #{hosNo}
+	</delete>
+	
+	<!-- 진료비 삭제 cat -->
+	<delete id="CatDelete" parameterType="hosDTO">
+		delete from cat where hosNo = #{hosNo}
+	</delete>
+	
+	<!-- **************************************리뷰 리스트********************************* -->
+	
+	<!-- 전체 리뷰  -->
+	<select id="ReviewListCount" resultType="int">
+		select count(*) from review
+	</select>
+	
+	
+	<!-- 리뷰 리스트 -->
+	<select id="ReviewList" parameterType="hashmap" resultType="userreviewDTO">
+	 <![CDATA[
+	 	SELECT B.*, r FROM 
+  				(SELECT A.*, rownum r FROM 
+  					(SELECT review.*, hospital.HOSNAME FROM review, HOSPITAL WHERE review.reviewhosno = hospital.HOSNO ORDER BY reviewdate desc) A
+  				ORDER BY reviewdate DESC) B
+  		WHERE r>= #{start} AND r <= #{end}
+	]]>
+	</select>
+	
+	<!-- 검색 글 개수 -->
+	<select id="searchReviewCount" parameterType="hashmap" resultType="int">
+		select count(*) from review where ${sel} like '%'||#{search}||'%'
+	</select>
+	
+	<!-- 검색 리뷰 리스트 -->
+	<select id="searchReviewList" parameterType="hashmap" resultType="userreviewDTO">
+	<![CDATA[
+		SELECT B.*, r FROM 
+  				(SELECT A.*, rownum r FROM 
+  					(SELECT review.*, hospital.HOSNAME FROM review, HOSPITAL WHERE review.reviewhosno = hospital.HOSNO ORDER BY reviewdate desc) A
+  				where ${sel} like '%'||#{search}||'%' ORDER BY reviewdate DESC) B
+  		WHERE r>= #{start} AND r <= #{end}
+	]]>	
+	</select>
+	
+	<!-- 리뷰 삭제  -->
+  	<delete id="adReviewDelete" parameterType="hosDTO">
+  		delete from review where REVIEWHOSNO=#{hosNo}
+  	</delete>
+  	
+	
+	<!--  ****************************관리자 메인******************************************* -->
+	<!--1:1문의 미답변 가져오기-->
+	<select id="mtmcount" resultType="int">
+		select count(*) from mtm where ref='none'
+	</select>
+	
+	<!-- 최신 리뷰 리스트 -->
+	<select id="NewReviewList" resultType="userreviewDTO">
+	 <![CDATA[
+	 	SELECT B.*, r FROM 
+  			(SELECT A.*, rownum r FROM 
+  					(SELECT review.*, hospital.HOSNAME FROM review, HOSPITAL WHERE review.reviewhosno = hospital.HOSNO ORDER BY reviewdate desc) A
+  			ORDER BY reviewdate DESC) B
+  		WHERE r >= 1 AND r <= 3
+	]]>
+	</select>
+	<!-- 회원 가입 현황 리스트 -->
+	<select id="NewUserList" resultType="userDTO">
+	 <![CDATA[
+		select B.*, r from
+   		 	(select A.*,rownum r from
+       			(select * from users order by reg desc)A
+    		order by reg desc)B
+		where r>=1 and r <=3
+	]]>
+	</select>
+	
+	<!-- 오늘 날짜 -->
+	<select id="today" resultType="String">
+		select TO_CHAR(SYSDATE,'yy/mm/dd') from dual
+	</select>
+	<!-- 하루 전 날짜 -->
+	<select id="yesterday" resultType="String">
+		select TO_CHAR(SYSDATE -1 ,'yy/mm/dd') from dual
+	</select>
+	<!-- 일주일 전 날짜 -->
+	<select id="yesterday7" resultType="String">
+		select TO_CHAR(SYSDATE -2 ,'yy/mm/dd') from dual
+	</select>
+	<!-- 한달 전 날짜 -->
+	<select id="yesterday30" resultType="String">
+		select TO_CHAR(SYSDATE -3 ,'yy/mm/dd') from dual
+	</select>
+	<!-- 하루전 날짜 count -->
+	<select id="yesterdaydate" parameterType="String" resultType="int">
+		select count(*) from users where to_char(reg, 'yy/mm/dd')=#{value}
+	</select>
+	<!-- *********************리뷰********************** -->
+	<!-- 하루전 날짜 count -->
+	<select id="Ryesterdaydate" parameterType="String" resultType="int">
+		select count(*) from review where to_char(reviewdate, 'yy/mm/dd')=#{value}
+	</select>
+	
+	<!-- **************************************유저 공지사항********************************* -->
+	<!-- 유저 공지사항 개수 -->
+	<select id="getNoticeCount" resultType="int">select count(*) from notice</select>
+		
+	<!-- 유저 공지사항 리스트 띄워주기 -->
+	<select parameterType="hashmap" id="getNoticeList" resultType="adminDTO">
+		<![CDATA[
+			select B.*, r from
+            	(select A.*,rownum r from
+                	(select * from notice order by noticeno desc)A
+           		order by noticeno desc)B
+        	where r>= #{startRow} and r <= #{endRow}
+		]]>
+		
+	</select>
+	
+	<!-- 유저 공지사항 상세 페이지 -->
+	<select parameterType="int" id="getNoticeContent" resultType="adminDTO">
+		select * from notice where noticeNo = #{value}
+	</select>
+
+	
+	
+	
+	
+	
+</mapper>

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 독타입매퍼 넣기 : mybatis 사이트에서 복붙 -->
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="hos">
+	
+	<!-- 해당 고유번호의 병원정보 가져오기 hosContent -->
+	<select id="getHosArticle" parameterType="int" resultType="hosDTO">
+		select * from hospital where hosNo=#{hosNo}
+	</select>
+	<!-- 해당 병원 전체 리뷰 개수 -->
+	<select id="revCountAll" parameterType="int" resultType="int">
+		select count(*) from review where reviewHosNo=#{hosNo}
+	</select>
+	<!-- 전체 리뷰목록 범위만큼 가져옴 searchResult // <![CDATA[ 이 안에꺼는 태그 아니다 문자열 그대로 받아들여주라 ]]>-->
+	<select id="getRevArticles" parameterType="hashMap" resultType="reviewDTO">
+		<![CDATA[
+		select B.*, r from (select A.*, rownum r from (select * from review where reviewHosNo=#{hosNo} 
+		order by reviewDate desc) A  order by reviewDate desc) B 
+		where r >= #{startKey} and r <= #{endKey}
+		]]>
+	</select>
+	
+	<!-- 전국평균 petType(dog/cat)- 테이블명 , diagnosis(진단명) : 평균 계산시 0값 제외처리함 ceil, -3: 3자리 이후로 올림 -->
+	<select id="getAvg" parameterType="hashMap" resultType="hashMap">
+		select ceil(round(avg(case when ${diagnosis} > 0 then ${diagnosis} end), -2)) ${diagnosis} from ${petType}
+	</select>
+	<!-- 시/도평균 petType(dog/cat) - , hosSi(시), diagnosis(진단명) -->
+	<select id="getAvgSi" parameterType="hashMap" resultType="hashMap">
+		select ceil(round(avg(case when ${diagnosis} > 0 then ${diagnosis} end), -2)) ${diagnosis} from hospital h, ${petType} d 
+		where h.hosNo = d.hosNo and h.hosSi=#{hosSi} group by h.hosSi
+	</select>
+	<!-- 시/군/구평균 petType(dog/cat), hosGu(구), dignosis(진단명) -->
+	<select id="getAvgGu" parameterType="hashMap" resultType="hashMap">
+		select ceil(round(avg(case when ${diagnosis} > 0 then ${diagnosis} end), -2)) ${diagnosis} from hospital h, ${petType} d 
+		where h.hosNo = d.hosNo and h.hosGu=#{hosGu} group by h.hosGu
+	</select>
+	<!-- 리뷰평균 reviewPetType=petType(dog/cat), reviewPrice(가격), reviewArticle=diagnosis(진료명), reviewHosNo=hosNo(병원고유번호) -->
+	<select id="reviewAvg" parameterType="hashMap" resultType="hashMap">
+		select ceil(round(avg(case when reviewPrice > 0 then reviewPrice end), -2)) 
+		from review where reviewHosNo=${hosNo} and reviewPetType=#{petType} and reviewArticle=#{diagnosis}
+	</select>
+	
+	
+	<!-- A,B 병원진료비 비교 reviewPetType=petType(dog/cat), reviewHosNo=hosNo(병원고유번호), reviewArticle=diagnosis(진료명) -->
+	<select id="getABArticle" parameterType="hashMap" resultType="hashMap">
+		select ceil(round(avg(case when reviewPrice > 0 then reviewPrice end), -2)) 
+		from review where reviewHosNo=${hosNo} and reviewPetType=#{petType} and reviewArticle=#{diagnosis}
+	</select>
+	
+	<!-- 병원 리뷰개수 -->
+	<select id="getAvgReCount" parameterType="hashMap" resultType="int">
+		SELECT count(*) from review WHERE reviewArticle=#{diagnosis} AND reviewHosNo=#{hosNo}
+	</select>
+	
+	
+	
+	
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</mapper>
+	
+
+

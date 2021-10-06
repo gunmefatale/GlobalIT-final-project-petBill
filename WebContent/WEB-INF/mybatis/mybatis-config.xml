@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+  
+<configuration>
+
+	<!--(디폴트값이 지정안된 상태에서 값이 안넘어왔을때 null로 표기가 되는데 
+		간혹 오류가 뜨기때문에 처리해주는 코드)-->
+		
+	<settings>
+		<setting name="jdbcTypeForNull" value="NULL"/>
+	</settings>
+
+
+	<!-- typeAliases DTO 별칭 지어주기 -->
+	<typeAliases>
+		<typeAlias type="petbill.user.model.UserDTO" alias="userDTO"/>
+		<typeAlias type="petbill.user.model.UserReviewDTO" alias="userreviewDTO"/>
+		<typeAlias type="petbill.user.model.MtmDTO" alias="mtmDTO"/>
+		<typeAlias type="petbill.review.model.ReviewDTO" alias="reviewDTO"/>
+		<typeAlias type="petbill.admin.model.AdminDTO" alias="adminDTO"/>
+		<typeAlias type="petbill.hospital.model.HospitalDTO" alias="hosDTO"/>
+		<typeAlias type="petbill.hospital.model.DogDTO" alias="dogDTO"/>
+		<typeAlias type="petbill.hospital.model.CatDTO" alias="catDTO"/>
+		<typeAlias type="petbill.search.model.RevCountDTO" alias="revDTO"/>
+	</typeAliases>
+
+	<!--mapper : sql문을 작성해놓을 xm파일들 매퍼들의 위치를 설정 -->
+	<mappers>
+		<mapper resource="/sql/adminSQL.xml"/>
+		<mapper resource="/sql/userSQL.xml"/>
+		<mapper resource="/sql/hospitalSQL.xml"/>
+		<mapper resource="/sql/reviewSQL.xml"/>
+		<mapper resource="/sql/searchSQL.xml"/>
+	</mappers>
+
+
+
+
+</configuration>

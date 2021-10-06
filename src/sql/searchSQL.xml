@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Mybatis 홈페이지에서 복사 붙여넣기 -->
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="search">
+  
+  	<!-- [검색X, 시/도 선택X, 시/구 선택X] - 전체 병원 list 개수   -->
+  	<select id="hosCountAll" resultType="int">
+  		select count(*) from hospital
+  	</select>
+  	
+  	<!-- [검색X, 시/도 선택X, 시/구 선택X] - 전체 병원 list -->
+  	<select id="getHospitals" parameterType="hashmap" resultType="hosDTO">
+  		<![CDATA[
+  			select B.*, r from
+  				(select A.*, rownum r from
+  					(select * from hospital order by hosno desc) A
+  				order by hosno desc) B
+  			where r >= #{start} and r <= #{end}
+  		]]>
+  	</select>
+  
+  	
+  	<!-- [검색O, 시/도 선택X, 시/구 선택X] - 검색한 병원 list 개수  -->
+  	<select id="getSearchHosCount" parameterType="hashmap" resultType="int">
+  		select count(*) from hospital where hosname like '%'||#{search}||'%'
+  	</select>
+  
+  
+  	<!-- [검색O, 시/도 선택X, 시/구 선택X] - 검색한 병원 list -->
+  	<select id="getSearchHosList" parameterType="hashmap" resultType="hosDTO">
+  		<![CDATA[			
+  			select B.*, r from
+  				(select A.*, rownum r from
+  					(select * from hospital where hosname like '%'||#{search}||'%' order by hosname asc) A
+  				order by hosname asc) B
+  			where r >= ${start} and r <= ${end}
+  		]]>
+  	</select>
+  	
+  	
+  	<!-- [검색X, 시/도 선택X, 시/구 선택O] - 선택 / 검색한 병원 list 개수 
+  	<select id="getSelSearchHosCount" parameterType="hashmap" resultType="int">
+  		select count(*) from hospital where hossi = #{sidoSel} and hosgu = #{siguSel}
+  		
+  		<where>
+  			<if test="siguSel != null">
+  				${siguSel}
+  			</if>
+  		</where>
+  		<if test="siguSel != null">
+  			where ${siguSel}
+  		</if>
+  	</select>
+  	
+  	-->
+  
+  	
+  	<!-- [검색X, 시/도 선택O, 시/구 선택O] - 선택 / 검색한 병원 list  
+  	<select id="getSelSearchHosList" parameterType="hashmap" resultType="hosDTO">
+  		<![CDATA[
+  			
+  			select B.*, r from
+  				(select A.*, rownum r from
+  					(select * from hospital where hossi = #{sidoSel} and hosgu = #{siguSel} order by hosname asc) A
+  				order by hosnewaddress asc) B
+  			where r >= #{start} and r <= #{end}
+  		]]>
+  		
+  			
+  					<where>
+  						<if test="siguSel != null">
+  							${siguSel} order by hosname asc) A
+  						</if>
+  					</where>
+  				 
+			  		<if test="siguSel != null">
+			  			where ${siguSel}
+			  		</if>
+  			
+  		<![CDATA[
+  				order by hosnum asc) B
+  			where r >= #{start} and r <= #{end}
+  		]]> 
+  	</select>
+  
+  -->
+  
+  
+  	<!-- [검색O, 시/도/구 선택O] 각 조건에 맞는 병원 개수 쿼리문  -->
+  	<select id="getSelHosCount" parameterType="hashMap" resultType="int">
+  		select count(*) from hospital
+  		<if test="search != null">
+  			where hosname like '%'||#{search}||'%'
+  		</if>
+  		<if test="sidoSel != null and siguSel != null">
+  			where hossi = #{sidoSel} and hosgu = #{siguSel}
+  		</if>
+  	</select>
+  	
+  	
+  	<!-- [검색O, 시/도/구 선택O] 각 조건에 맞는 병원 리스트 쿼리문  -->
+  	<select id="getSelSearchList" parameterType="hashMap" resultType="revDTO">
+  		<![CDATA[
+  			select B.* from (select A.*, rownum r from
+  		]]>
+  			<if test="search == null and sidoSel == null and siguSel == null">
+	  				(select * from hospital order by hosno asc) A 
+	  			order by hosname asc) B
+  			</if>
+  			<if test="search != null">
+	  				(select * from hospital where hosname like '%'||#{search}||'%' order by hosname asc) A 
+	  			order by hossi asc) B
+  			</if>
+  			<if test="sidoSel != null and siguSel != null">
+  					(select * from hospital where hossi = #{sidoSel} and hosgu = #{siguSel} order by hosNo asc) A
+  				order by hosname asc) B
+  			</if>
+  		<![CDATA[
+  			where r >= #{start} and r <= #{end}
+  		]]>
+  	</select>
+  	
+  	
+  	
+  	<!-- [Review] 해당 병원들의 리뷰 list 
+  	<select id="getReviewList" parameterType="hashMap" resultType="reviewDTO">
+  		select * from review where reviewHosNo = #{hosNo};
+  	</select>
+  	-->
+  	
+  	
+  	
+  	
+  	<!-- [Review] 해당 병원의 리뷰 수 가져오기 ≈
+  	<select id="revCount" parameterType="hashMap" resultType="int">
+  		select count(*) from review where reviewHosNo = #{hosNo};
+  	</select>
+	-->
+  
+  
+  
+  
+  
+  </mapper>

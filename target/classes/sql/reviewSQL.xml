@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="review">
+  
+  
+  	<!-- 리뷰 작성  -->
+  	<insert id="reviewWrite" parameterType="reviewDTO">
+  		insert into review(reviewNo, reviewSubject, reviewId, reviewPetType, reviewArticle, reviewPhoto, reviewPrice, reviewContent, reviewHosNo, reviewDate) 
+  		values (review_seq.nextval,#{reviewSubject},#{reviewId},#{reviewPetType},#{reviewArticle},
+  		<if test="reviewPhoto != null">#{reviewPhoto},</if>
+  		<if test="reviewPhoto == null">null,</if>
+  		#{reviewPrice},#{reviewContent},#{reviewHosNo},sysdate)
+  	</insert>
+  	
+  	<!-- 리뷰 개수 count -->
+  	<select id="totleRevCount" parameterType="reviewDTO" resultType="int">
+  		select count(*) from review WHERE reviewHosNo=${reviewHosNo}
+  	</select>
+  	
+  	<!-- 리뷰 count up +1 메서드 건우/태준  --> 
+  	<update id="revCountUp" parameterType="hashmap">
+  		update hospital set revCount = ${count} where hosno = #{reviewHosNo}
+  	</update>
+  	
+  	<!-- list  -->
+  	<select id="getReview" resultType="reviewDTO">
+  		select * from review
+  	</select>
+  
+  	<!--  게시글 하나만 불러오기  -->
+  	<select id="getReviewOne" parameterType="int" resultType="reviewDTO">
+		select * from review where reviewNo = #{value}
+	</select>
+  
+   	<!-- 리뷰 업데이트  -->
+  	<update id="updateReview" parameterType="reviewDTO" >
+  		update review set 
+  		reviewSubject=#{reviewSubject}, reviewArticle=#{reviewArticle},reviewPrice=#{reviewPrice}, reviewContent=#{reviewContent}
+  		where reviewNo=#{reviewNo}
+  	</update>
+  
+   	<!-- 리뷰 업데이트 파일  -->
+  	<update id="updateReviewFile" parameterType="reviewDTO" >
+  		update review set reviewPhoto=#{reviewPhoto} where reviewNo=#{reviewNo}
+  	</update>
+
+  	<!-- 리뷰 삭제  -->
+  	<delete id="deleteReview" parameterType="reviewDTO">
+  		delete from review where reviewNo=#{reviewNo}
+  	</delete>
+  	
+  </mapper>
