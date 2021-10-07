@@ -12,7 +12,7 @@
   
 # 사용
   - Back-end (Spring framework)
-    SVG, Naver map API, kakao login API, chart API
+    SVG, Naver map API, kakao login API, Chart.js
   
   - Front-end
     HTML5 / CSS3 / JavaScript / aJax 
