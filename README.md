@@ -19,8 +19,8 @@
     HTML5 / CSS3 / JavaScript / aJax 
 
 # DATA (각 셀 기준 - 약 380,000 data 사용)
-  - 서울시 : 서울시 열린 데이터광장 -> 동물병원 인허가 정보 데이터 사용
-  - 서울시 외 전국 : 공공데이터포털 -> 동물병원 인허가 정보 데이터 사용
+  - 서울시 : 서울시 열린 데이터광장 -> 서울시 동물병원 인허가 정보 데이터 사용
+  - 서울시 외 전국 : 공공데이터포털 -> 전국 동물병원 인허가 정보 데이터 사용
   - 가격정보 및 질병정보
     petPrice(app) (강아지 - 40개 / 고양이 - 39개) 데이터 사용.
     
@@ -38,6 +38,11 @@
       Java
       SQL
       JavaScript
+  - Development Tools
+      eclipseJEE
+      DBeaver
+      SQL Developer
+      VSCode
       
     
   
